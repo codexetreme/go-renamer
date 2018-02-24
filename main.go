@@ -20,12 +20,12 @@ func main() {
 }
 
 type Renamer struct {
-	directoryPath string
-	totalFiles    int
-	opt           options
+	directoryPath string  // the directory path where the renaming will take place
+	totalFiles    int     // holds the total files in the directory
+	opt           options // options for the cmd invoking
 	index         int
-	baseFileName  string
-	ui            input.UI
+	baseFileName  string   // name of the original file
+	ui            input.UI // input receiver from the tcknsm package
 }
 
 type options struct {
@@ -45,7 +45,6 @@ func (o *options) check_options(flags *flagsParser.Flags) {
 func Start(flags *flagsParser.Flags) *Renamer {
 	var err error
 	var r Renamer
-	var name string
 	sigs := make(chan os.Signal, 1)
 	done := make(chan bool, 1)
 	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
@@ -62,12 +61,12 @@ func Start(flags *flagsParser.Flags) *Renamer {
 	}()
 	r.index = 0
 	if !r.opt.using_i {
-		name, err = r.ui.Ask("Please enter a file name", &input.Options{
+		r.baseFileName, err = r.ui.Ask("Please enter a file name", &input.Options{
 			Required:  true,
 			Loop:      true,
 			HideOrder: true,
 		})
-		r.baseFileName = name
+
 	}
 	r.rename(r.directoryPath)
 	return &r
@@ -135,5 +134,6 @@ func (r *Renamer) getNewFileName(fileName string) string {
 	if len(fileData) > 1 {
 		return r.baseFileName + strconv.Itoa(r.index) + "." + fileData[len(fileData)-1] //adds extension if found
 	}
+	//creates a file name by adding the base file name plus (String)index
 	return r.baseFileName + strconv.Itoa(r.index)
 }
